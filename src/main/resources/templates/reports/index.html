@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Reports')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('reports')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Reports')}"></header>
+<main class="app-content">
+<div class="card mb-3"><div class="card-body">
+  <form id="repForm" class="row g-2 align-items-end">
+    <div class="col-md-3"><label class="form-label small">Report</label><select id="type" class="form-select">
+      <option value="DAILY">Daily sales</option><option value="WEEKLY">Weekly sales</option><option value="MONTHLY">Monthly sales</option>
+      <option value="PRODUCT">Product-wise sales</option><option value="CATEGORY">Category-wise sales</option>
+      <option value="PROFIT">Profit report</option><option value="TAX">Tax (GST) report</option><option value="PAYMENT">Payment-method report</option></select></div>
+    <div class="col-md-2"><label class="form-label small">From</label><input type="date" id="from" class="form-control" th:value="${from}"></div>
+    <div class="col-md-2"><label class="form-label small">To</label><input type="date" id="to" class="form-control" th:value="${to}"></div>
+    <div class="col-md-5 d-flex gap-2"><button class="btn btn-primary" type="submit">Show</button><a class="btn btn-success" id="csvBtn" href="#"><i class="bi bi-filetype-csv"></i> Export CSV</a></div>
+  </form></div></div>
+<div class="card mb-3"><div class="card-header" id="repTitle">Report</div><div class="card-body"><div style="height:320px"><canvas id="repChart"></canvas></div></div></div>
+<div class="card"><div class="table-responsive"><table class="table table-hover mb-0"><thead id="repHead"></thead><tbody id="repBody"></tbody></table></div></div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script th:src="@{/js/reports.js}"></script>
+</body></html>

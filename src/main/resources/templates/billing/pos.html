@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Billing / POS')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('billing')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Billing / POS')}"></header>
+<main class="app-content">
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card"><div class="card-body position-relative">
+      <div class="scan-bar">
+        <div class="input-group input-group-lg">
+          <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+          <input id="search" class="form-control" placeholder="Scan or type barcode / product name, then Enter" autocomplete="off" autofocus aria-label="Scan barcode or search product">
+        </div>
+        <button type="button" class="btn-scan" id="camBtn" aria-pressed="false" aria-controls="scanDock" title="Scan with camera or Iriun Webcam (F4)"><i class="bi bi-camera-video-fill"></i><span class="lbl-text">Camera</span><span class="live"></span></button>
+      </div>
+      <div id="lastScan" class="last-scan" role="status"></div>
+      <div id="scanDock" class="scan-dock">
+        <div class="dock-head"><span>Camera scanner. Pick <strong>Iriun Webcam</strong> to use your phone.</span><button type="button" class="btn btn-sm btn-light" id="dockClose">Close</button></div>
+        <div th:replace="~{fragments/layout :: scanPanel}"></div>
+      </div>
+      <div id="results" class="list-group pos-results d-none"></div>
+    </div></div>
+    <div class="card mt-3">
+      <div class="bill-head"><h2>Current bill</h2><span class="item-count" id="itemCount">0 items</span></div>
+      <div class="table-responsive"><table class="table mb-0">
+        <thead><tr><th>Product</th><th class="text-end">Price</th><th class="text-center">Qty</th><th class="text-end">GST</th><th class="text-end">Amount</th><th></th></tr></thead>
+        <tbody id="cartBody"></tbody></table></div>
+      <div id="emptyCart" class="cart-empty"><i class="bi bi-upc-scan"></i><div class="fw-semibold mt-2">No items yet</div><div class="small">Scan a barcode or QR code, or type a name above.</div></div>
+    </div>
+    <p class="small text-muted mt-2 mb-0"><kbd>F2</kbd> search &nbsp; <kbd>F4</kbd> camera &nbsp; <kbd>Enter</kbd> add &nbsp; <kbd>&uarr;</kbd><kbd>&darr;</kbd> pick result &nbsp; <kbd>F9</kbd> pay &nbsp; <kbd>F8</kbd> clear cart &nbsp; <kbd>Esc</kbd> clear search</p>
+  </div>
+  <div class="col-lg-4">
+    <div class="card receipt"><div class="card-body">
+      <div class="row g-2 mb-2">
+        <div class="col-6"><label class="form-label" for="custPhone">Customer phone</label><input id="custPhone" class="form-control" placeholder="Optional" inputmode="tel"></div>
+        <div class="col-6"><label class="form-label" for="custName">Customer name</label><input id="custName" class="form-control" placeholder="Optional" maxlength="120"></div>
+      </div>
+      <div class="row g-2 mb-3">
+        <div class="col-5"><label class="form-label" for="discType">Discount</label>
+          <select id="discType" class="form-select"><option value="NONE">None</option><option value="PERCENT">Percent</option><option value="AMOUNT" th:text="${store.currency}">Amt</option></select></div>
+        <div class="col-7"><label class="form-label" for="discValue">Value</label><input id="discValue" type="number" min="0" step="0.01" value="0" class="form-control" disabled></div>
+      </div>
+      <label class="form-label">Payment method</label>
+      <div class="btn-group w-100 pay-methods" role="group">
+        <th:block th:each="m, st : ${methods}">
+          <input type="radio" class="btn-check" name="pay" th:id="${'pay' + m}" th:value="${m}" th:checked="${st.first}" autocomplete="off">
+          <label class="btn btn-outline-primary" th:for="${'pay' + m}" th:text="${m}">CASH</label>
+        </th:block>
+      </div>
+      <input id="payRef" class="form-control mt-2 d-none" placeholder="Reference / transaction ID (optional)" maxlength="100" aria-label="Payment reference">
+      <hr class="rule">
+      <dl class="row mb-0">
+        <dt class="col-6">Subtotal</dt><dd class="col-6 text-end mb-1" id="tSub">0.00</dd>
+        <dt class="col-6">Discount</dt><dd class="col-6 text-end text-danger mb-1" id="tDisc">0.00</dd>
+        <dt class="col-6">GST</dt><dd class="col-6 text-end mb-0" id="tTax">0.00</dd>
+      </dl>
+      <hr class="rule">
+      <div class="total-row"><span>Total</span><span class="pos-total" id="tTotal">0.00</span></div>
+      <div id="cashBox" class="mt-3">
+        <label class="form-label" for="cashIn">Cash received</label>
+        <input id="cashIn" type="number" min="0" step="0.01" class="form-control" placeholder="Amount from customer" inputmode="decimal">
+        <div id="changeBox" class="change-box"><span id="changeLbl">Change to return</span><span class="tnum" id="changeAmt">0.00</span></div>
+      </div>
+      <div id="payError" class="alert alert-danger py-2 mt-3 mb-0 d-none"></div>
+      <button id="payBtn" class="btn btn-success btn-lg w-100 mt-3" disabled><i class="bi bi-check2-circle"></i> Pay &amp; print (F9)</button>
+      <button id="clearBtn" class="btn btn-light w-100 mt-2">Clear bill (F8)</button>
+    </div></div>
+  </div>
+</div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script th:inline="javascript">window.POS_CURRENCY = /*[[${store.currency}]]*/ 'Rs';</script>
+<script th:src="@{/js/pos.js}"></script>
+</body>
+</html>

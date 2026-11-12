@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('dashboard')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Dashboard')}"></header>
+<main class="app-content">
+<div class="row g-3 mb-3">
+  <div class="col-6 col-xl"><div class="card stat-card"><div class="card-body"><div class="ico"><i class="bi bi-currency-rupee"></i></div><div><div class="lbl">Today's sales</div><div class="value" th:text="${store.currency + #numbers.formatDecimal(d.todaySales, 1, 'COMMA', 2, 'POINT')}">0</div></div></div></div></div>
+  <div class="col-6 col-xl"><div class="card stat-card green"><div class="card-body"><div class="ico"><i class="bi bi-receipt"></i></div><div><div class="lbl">Bills today</div><div class="value" th:text="${d.billsToday}">0</div></div></div></div></div>
+  <div class="col-6 col-xl"><div class="card stat-card purple"><div class="card-body"><div class="ico"><i class="bi bi-box-seam"></i></div><div><div class="lbl">Total products</div><div class="value" th:text="${d.totalProducts}">0</div></div></div></div></div>
+  <div class="col-6 col-xl"><div class="card stat-card orange"><div class="card-body"><div class="ico"><i class="bi bi-exclamation-triangle"></i></div><div><div class="lbl">Low-stock products</div><div class="value"><a class="text-decoration-none text-warning" th:href="@{/products(stock='LOW')}" th:text="${d.lowStockProducts}">0</a></div></div></div></div></div>
+  <div class="col-12 col-xl"><div class="card stat-card green"><div class="card-body"><div class="ico"><i class="bi bi-graph-up-arrow"></i></div><div><div class="lbl">Today's profit</div><div class="value" th:text="${store.currency + #numbers.formatDecimal(d.todayProfit, 1, 'COMMA', 2, 'POINT')}">0</div></div></div></div></div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-lg-8"><div class="card"><div class="card-header">Sales - last 7 days</div><div class="card-body"><canvas id="salesChart" height="110"></canvas></div></div></div>
+  <div class="col-lg-4"><div class="card"><div class="card-header">Payment methods - last 30 days</div><div class="card-body"><canvas id="payChart" height="220"></canvas></div></div></div>
+</div>
+<div class="card"><div class="card-header">Recent transactions</div>
+  <div class="table-responsive"><table class="table table-hover mb-0">
+    <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Payment</th><th class="text-end">Total</th><th></th></tr></thead>
+    <tbody>
+      <tr th:each="s : ${d.recentSales}">
+        <td th:text="${s.invoiceNumber}">INV</td>
+        <td th:text="${#temporals.format(s.saleDate, 'dd MMM yyyy HH:mm')}">date</td>
+        <td th:text="${s.customerName ?: 'Walk-in'}">c</td>
+        <td><span class="badge text-bg-secondary" th:text="${s.paymentMethod}">CASH</span></td>
+        <td class="text-end" th:text="${store.currency + #numbers.formatDecimal(s.grandTotal, 1, 'COMMA', 2, 'POINT')}">0</td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-primary" th:href="@{/sales/{id}/invoice(id=${s.id})}">View</a></td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(d.recentSales)}"><td colspan="6" class="text-center text-muted py-4">No sales yet</td></tr>
+    </tbody></table></div></div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+  const dayLabels = /*[[${d.dayLabels}]]*/ [], dayValues = /*[[${d.dayValues}]]*/ [];
+  const payLabels = /*[[${d.payLabels}]]*/ [], payValues = /*[[${d.payValues}]]*/ [];
+  new Chart(document.getElementById('salesChart'), { type: 'bar',
+    data: { labels: dayLabels, datasets: [{ label: 'Sales', data: dayValues, backgroundColor: '#2563eb', borderRadius: 6 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+  new Chart(document.getElementById('payChart'), { type: 'doughnut',
+    data: { labels: payLabels, datasets: [{ data: payValues, backgroundColor: ['#12a150', '#2563eb', '#f59e0b'] }] } });
+</script>
+</body>
+</html>

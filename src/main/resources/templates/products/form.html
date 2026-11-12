@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Product')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('products')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Product')}"></header>
+<main class="app-content">
+<div class="card" style="max-width:900px"><div class="card-body">
+<h2 class="h5 mb-3" th:text="${form.id == null} ? 'Add product' : 'Edit product'">Product</h2>
+<form th:action="@{/products/save}" th:object="${form}" method="post" class="needs-validation row g-3" novalidate>
+  <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}"><div th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div></div>
+  <input type="hidden" th:field="*{id}">
+  <div class="col-md-4"><label class="form-label">Product ID / Barcode *</label><div class="field-scan"><input id="barcodeInput" class="form-control" th:field="*{barcode}" th:errorclass="is-invalid" maxlength="50" required placeholder="Scan or type">
+      <button type="button" class="btn btn-outline-primary" data-scan-target="#barcodeInput" title="Scan with camera"><i class="bi bi-camera"></i></button></div>
+    <div class="invalid-feedback" th:errors="*{barcode}">Required</div></div>
+  <div class="col-md-8"><label class="form-label">Name *</label><input class="form-control" th:field="*{name}" th:errorclass="is-invalid" maxlength="150" required>
+    <div class="invalid-feedback" th:errors="*{name}">Required</div></div>
+  <div class="col-md-6"><label class="form-label">Category *</label><select class="form-select" th:field="*{categoryId}" th:errorclass="is-invalid" required>
+    <option value="">Select...</option><option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option></select>
+    <div class="invalid-feedback" th:errors="*{categoryId}">Required</div></div>
+  <div class="col-md-6"><label class="form-label">Supplier</label><select class="form-select" th:field="*{supplierId}">
+    <option value="">None</option><option th:each="s : ${suppliers}" th:value="${s.id}" th:text="${s.name}"></option></select></div>
+  <div class="col-md-3"><label class="form-label">Purchase price *</label><input type="number" step="0.01" min="0" class="form-control" th:field="*{purchasePrice}" th:errorclass="is-invalid" required>
+    <div class="invalid-feedback" th:errors="*{purchasePrice}">Required</div></div>
+  <div class="col-md-3"><label class="form-label">Selling price *</label><input type="number" step="0.01" min="0" class="form-control" th:field="*{sellingPrice}" th:errorclass="is-invalid" required>
+    <div class="invalid-feedback" th:errors="*{sellingPrice}">Required</div></div>
+  <div class="col-md-3"><label class="form-label">GST % *</label><input type="number" step="0.01" min="0" max="100" class="form-control" th:field="*{gstPercent}" th:errorclass="is-invalid" required>
+    <div class="invalid-feedback" th:errors="*{gstPercent}">Required</div></div>
+  <div class="col-md-3"><label class="form-label">Available quantity *</label><input type="number" min="0" step="1" class="form-control" th:field="*{quantity}" th:errorclass="is-invalid" required>
+    <div class="invalid-feedback" th:errors="*{quantity}">Required</div></div>
+  <div class="col-md-3"><label class="form-label">Reorder level *</label><input type="number" min="0" step="1" class="form-control" th:field="*{reorderLevel}" th:errorclass="is-invalid" required>
+    <div class="invalid-feedback" th:errors="*{reorderLevel}">Required</div></div>
+  <div class="col-md-3"><label class="form-label">Expiry date</label><input type="date" class="form-control" th:field="*{expiryDate}" th:errorclass="is-invalid">
+    <div class="invalid-feedback" th:errors="*{expiryDate}">Invalid</div></div>
+  <div class="col-12 d-none" id="codePreview"><label class="form-label">Barcode &amp; QR (same product ID)</label>
+    <div class="d-flex flex-wrap align-items-center gap-3 code-preview"><div class="pv-barwrap"><svg id="pvBar" class="pv-bar"></svg></div><div id="pvQr" class="pv-qr"></div></div></div>
+  <div class="col-12 d-flex gap-2"><button class="btn btn-primary" type="submit">Save product</button><a class="btn btn-light" th:href="@{/products}">Cancel</a></div>
+</form></div></div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script th:src="@{/js/vendor/JsBarcode.all.min.js}"></script>
+<script th:src="@{/js/vendor/qrcode.js}"></script>
+<script th:src="@{/js/codes.js}"></script>
+<script th:src="@{/js/code-preview.js}"></script>
+</body></html>

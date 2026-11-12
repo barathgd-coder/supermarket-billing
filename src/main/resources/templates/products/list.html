@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Products')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('products')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Products')}"></header>
+<main class="app-content">
+<div class="card mb-3"><div class="card-body">
+  <form method="get" th:action="@{/products}" class="row g-2 align-items-end">
+    <div class="col-md-3"><label class="form-label small">Search</label><div class="field-scan"><input id="qInput" name="q" th:value="${q}" class="form-control" placeholder="Name or barcode"><button type="button" class="btn btn-outline-primary" data-scan-target="#qInput" title="Scan with camera"><i class="bi bi-camera"></i></button></div></div>
+    <div class="col-md-2"><label class="form-label small">Category</label><select name="category" class="form-select"><option value="">All</option><option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${c.id == category}"></option></select></div>
+    <div class="col-md-3"><label class="form-label small">Supplier</label><select name="supplier" class="form-select"><option value="">All</option><option th:each="s : ${suppliers}" th:value="${s.id}" th:text="${s.name}" th:selected="${s.id == supplier}"></option></select></div>
+    <div class="col-md-2"><label class="form-label small">Stock</label><select name="stock" class="form-select">
+      <option value="">All</option><option value="IN" th:selected="${stock == 'IN'}">In stock</option><option value="LOW" th:selected="${stock == 'LOW'}">Low stock</option>
+      <option value="OUT" th:selected="${stock == 'OUT'}">Out of stock</option><option value="EXPIRED" th:selected="${stock == 'EXPIRED'}">Expired</option></select></div>
+    <div class="col-md-2 d-flex gap-2"><button class="btn btn-primary flex-fill">Filter</button><a class="btn btn-light" th:href="@{/products}">Reset</a></div>
+  </form></div></div>
+<div class="d-flex justify-content-between mb-2"><span class="text-muted small" th:text="${page.totalElements + ' products'}"></span>
+  <div class="d-flex gap-2"><a class="btn btn-outline-primary" th:href="@{/products/labels(q=${q})}"><i class="bi bi-qr-code"></i> Barcode &amp; QR labels</a>
+  <a class="btn btn-success" th:href="@{/products/new}"><i class="bi bi-plus-lg"></i> Add product</a></div></div>
+<div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+  <thead><tr><th>Barcode</th><th>Name</th><th>Category</th><th>Supplier</th><th class="text-end">Cost</th><th class="text-end">Price</th><th class="text-end">GST</th><th class="text-end">Qty</th><th>Expiry</th><th></th></tr></thead>
+  <tbody>
+  <tr th:each="p : ${page.content}">
+    <td th:text="${p.barcode}"></td><td th:text="${p.name}"></td><td th:text="${p.category.name}"></td><td th:text="${p.supplier?.name}"></td>
+    <td class="text-end" th:text="${#numbers.formatDecimal(p.purchasePrice, 1, 2)}"></td>
+    <td class="text-end" th:text="${#numbers.formatDecimal(p.sellingPrice, 1, 2)}"></td>
+    <td class="text-end" th:text="${p.gstPercent.stripTrailingZeros().toPlainString() + '%'}"></td>
+    <td class="text-end"><span class="badge" th:classappend="${p.outOfStock} ? 'text-bg-danger' : (${p.lowStock} ? 'text-bg-warning' : 'text-bg-success')" th:text="${p.quantity}"></span></td>
+    <td><span th:if="${p.expiryDate != null}" class="badge" th:classappend="${p.expired} ? 'text-bg-danger' : (${p.nearExpiry} ? 'text-bg-warning' : 'text-bg-light border')" th:text="${#temporals.format(p.expiryDate, 'dd MMM yyyy')}"></span></td>
+    <td class="text-end text-nowrap">
+      <a class="btn btn-sm btn-outline-secondary" th:href="@{/products/labels(q=${p.barcode})}" title="Barcode &amp; QR label"><i class="bi bi-qr-code"></i></a>
+      <a class="btn btn-sm btn-outline-primary" th:href="@{/products/{id}/edit(id=${p.id})}"><i class="bi bi-pencil"></i></a>
+      <form class="d-inline" method="post" th:action="@{/products/{id}/delete(id=${p.id})}" th:attr="data-confirm='Delete ' + ${p.name} + '?'"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form>
+    </td></tr>
+  <tr th:if="${page.empty}"><td colspan="10" class="text-center text-muted py-4">No products found</td></tr>
+  </tbody></table></div>
+  <div class="card-footer" th:replace="~{fragments/layout :: pagination(${page})}"></div></div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body></html>

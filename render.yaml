@@ -1,0 +1,21 @@
+# Render Blueprint: New + > Blueprint > pick this repo
+services:
+  - type: web
+    name: supermarket-billing
+    runtime: docker
+    plan: free
+    healthCheckPath: /login
+    envVars:
+      - key: APP_PROFILE
+        value: h2            # change to "mysql" and add DB_URL/DB_USER/DB_PASSWORD for a persistent database
+      - key: THYMELEAF_CACHE
+        value: "true"
+      - key: JAVA_OPTS
+        value: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k"
+      # --- Uncomment for MySQL (set the secret values in the Render dashboard) ---
+      # - key: DB_URL
+      #   sync: false        # e.g. jdbc:mysql://host:port/dbname?useSSL=true&serverTimezone=UTC
+      # - key: DB_USER
+      #   sync: false
+      # - key: DB_PASSWORD
+      #   sync: false

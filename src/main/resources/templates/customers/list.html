@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Customers')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('customers')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Customers')}"></header>
+<main class="app-content">
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card mb-2"><div class="card-body py-2"><form method="get" th:action="@{/customers}" class="d-flex gap-2">
+      <input name="q" th:value="${q}" class="form-control" placeholder="Search by name or phone"><button class="btn btn-primary">Search</button><a class="btn btn-light" th:href="@{/customers}">Reset</a></form></div></div>
+    <div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+      <thead><tr><th>Name</th><th>Phone</th><th></th></tr></thead>
+      <tbody><tr th:each="c : ${page.content}"><td th:text="${c.name}"></td><td th:text="${c.phone}"></td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-primary" th:href="@{/customers/{id}(id=${c.id})}">History</a>
+          <a class="btn btn-sm btn-outline-secondary" th:href="@{/customers(edit=${c.id})}"><i class="bi bi-pencil"></i></a></td></tr>
+      <tr th:if="${page.empty}"><td colspan="3" class="text-center text-muted py-4">No customers</td></tr></tbody></table></div>
+      <div class="card-footer" th:replace="~{fragments/layout :: pagination(${page})}"></div></div>
+  </div>
+  <div class="col-lg-4"><div class="card"><div class="card-header" th:text="${form.id == null} ? 'Add customer' : 'Edit customer'">Customer</div><div class="card-body">
+    <form th:action="@{/customers/save}" th:object="${form}" method="post" class="needs-validation" novalidate>
+      <div class="alert alert-danger py-2" th:if="${#fields.hasGlobalErrors()}"><div th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div></div>
+      <input type="hidden" th:field="*{id}">
+      <div class="mb-2"><label class="form-label small mb-0">Name *</label><input class="form-control" th:field="*{name}" th:errorclass="is-invalid" maxlength="120" required><div class="invalid-feedback" th:errors="*{name}">Required</div></div>
+      <div class="mb-3"><label class="form-label small mb-0">Phone *</label><input class="form-control" th:field="*{phone}" th:errorclass="is-invalid" pattern="[0-9+\- ]{7,15}" required><div class="invalid-feedback" th:errors="*{phone}">Enter a valid phone number</div></div>
+      <button class="btn btn-primary">Save</button> <a class="btn btn-light" th:href="@{/customers}" th:if="${form.id != null}">Cancel</a>
+    </form></div></div></div>
+</div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body></html>

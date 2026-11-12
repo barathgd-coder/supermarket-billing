@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Settings')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('settings')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Settings')}"></header>
+<main class="app-content">
+<div class="row g-3">
+  <div class="col-lg-8"><div class="card"><div class="card-header">Store, tax and invoice settings</div><div class="card-body">
+    <form th:action="@{/settings/store}" th:object="${form}" method="post" class="needs-validation row g-3" novalidate>
+      <div class="col-md-6"><label class="form-label">Store name *</label><input class="form-control" th:field="*{storeName}" th:errorclass="is-invalid" required><div class="invalid-feedback" th:errors="*{storeName}">Required</div></div>
+      <div class="col-md-6"><label class="form-label">Phone</label><input class="form-control" th:field="*{phone}" th:errorclass="is-invalid"><div class="invalid-feedback" th:errors="*{phone}">Invalid</div></div>
+      <div class="col-12"><label class="form-label">Address</label><input class="form-control" th:field="*{address}" maxlength="250"></div>
+      <div class="col-md-4"><label class="form-label">GSTIN</label><input class="form-control" th:field="*{gstin}" maxlength="30"></div>
+      <div class="col-md-4"><label class="form-label">Default GST % *</label><input type="number" step="0.01" min="0" max="100" class="form-control" th:field="*{defaultGst}" th:errorclass="is-invalid" required><div class="invalid-feedback" th:errors="*{defaultGst}">Invalid</div></div>
+      <div class="col-md-4"><label class="form-label">Default reorder level *</label><input type="number" min="0" class="form-control" th:field="*{defaultReorderLevel}" th:errorclass="is-invalid" required><div class="invalid-feedback" th:errors="*{defaultReorderLevel}">Invalid</div></div>
+      <div class="col-md-4"><label class="form-label">Invoice prefix *</label><input class="form-control" th:field="*{invoicePrefix}" th:errorclass="is-invalid" maxlength="6" required><div class="invalid-feedback" th:errors="*{invoicePrefix}">2-6 letters/digits</div></div>
+      <div class="col-md-4"><label class="form-label">Currency symbol *</label><input class="form-control" th:field="*{currency}" th:errorclass="is-invalid" maxlength="3" required><div class="invalid-feedback" th:errors="*{currency}">Required</div></div>
+      <div class="col-12"><label class="form-label">Invoice footer message</label><input class="form-control" th:field="*{invoiceFooter}" maxlength="200"></div>
+      <div class="col-12"><button class="btn btn-primary">Save settings</button></div>
+    </form></div></div></div>
+  <div class="col-lg-4">
+    <div class="card mb-3"><div class="card-header">Store logo</div><div class="card-body text-center">
+      <img th:src="@{/logo(v=${store.logoVersion})}" alt="logo" style="max-height:90px" class="mb-3 d-block mx-auto">
+      <form th:action="@{/settings/logo}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/png,image/jpeg,image/gif" class="form-control mb-2" required>
+        <button class="btn btn-outline-primary w-100">Upload logo</button><div class="form-text">PNG, JPG or GIF, max 2 MB</div>
+      </form></div></div>
+    <div class="card"><div class="card-header">Categories</div><div class="card-body">
+      <form th:action="@{/settings/categories}" method="post" class="input-group mb-2"><input name="name" class="form-control" placeholder="New category" maxlength="80" required><button class="btn btn-success">Add</button></form>
+      <ul class="list-group list-group-flush overflow-auto" style="max-height:260px"><li class="list-group-item d-flex justify-content-between align-items-center px-0" th:each="c : ${categories}"><span th:text="${c.name}"></span>
+        <form method="post" th:action="@{/settings/categories/{id}/delete(id=${c.id})}" th:attr="data-confirm='Delete category ' + ${c.name} + '?'"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form></li></ul>
+    </div></div>
+  </div>
+</div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body></html>

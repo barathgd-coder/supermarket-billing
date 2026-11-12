@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Customer')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('customers')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Customer')}"></header>
+<main class="app-content">
+<div class="row g-3 mb-3">
+  <div class="col-md-6"><div class="card"><div class="card-body"><h2 class="h5" th:text="${customer.name}">Name</h2><div class="text-muted" th:text="${customer.phone}">phone</div></div></div></div>
+  <div class="col-md-3"><div class="card stat-card green"><div class="card-body"><div class="ico"><i class="bi bi-wallet2"></i></div><div><div class="lbl">Total spent</div><div class="value" th:text="${store.currency + #numbers.formatDecimal(totalSpent, 1, 'COMMA', 2, 'POINT')}">0</div></div></div></div></div>
+  <div class="col-md-3"><div class="card stat-card"><div class="card-body"><div class="ico"><i class="bi bi-bag-check"></i></div><div><div class="lbl">Purchases</div><div class="value" th:text="${#lists.size(sales)}">0</div></div></div></div></div>
+</div>
+<div class="card"><div class="card-header">Purchase history</div><div class="table-responsive"><table class="table table-hover mb-0">
+  <thead><tr><th>Invoice</th><th>Date</th><th>Payment</th><th class="text-end">Total</th><th></th></tr></thead>
+  <tbody><tr th:each="s : ${sales}"><td th:text="${s.invoiceNumber}"></td><td th:text="${#temporals.format(s.saleDate, 'dd MMM yyyy HH:mm')}"></td>
+    <td th:text="${s.paymentMethod}"></td><td class="text-end" th:text="${store.currency + #numbers.formatDecimal(s.grandTotal, 1, 'COMMA', 2, 'POINT')}"></td>
+    <td class="text-end"><a class="btn btn-sm btn-outline-primary" th:href="@{/sales/{id}/invoice(id=${s.id})}">View</a></td></tr>
+  <tr th:if="${#lists.isEmpty(sales)}"><td colspan="5" class="text-center text-muted py-4">No purchases yet</td></tr></tbody></table></div></div>
+<a class="btn btn-light mt-3" th:href="@{/customers}">&laquo; Back</a>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body></html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Print labels')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('products')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Barcode &amp; QR labels')}"></header>
+<main class="app-content">
+<div class="card mb-3 no-print"><div class="card-body">
+  <form method="get" th:action="@{/products/labels}" class="row g-2 align-items-end">
+    <div class="col-md-5"><label class="form-label small">Product name or barcode (leave empty for all products)</label>
+      <input name="q" th:value="${q}" class="form-control" placeholder="e.g. milk"></div>
+    <div class="col-auto d-flex gap-2">
+      <button class="btn btn-primary">Show</button>
+      <button type="button" class="btn btn-success" id="printLabels"><i class="bi bi-printer"></i> Print</button>
+      <a class="btn btn-light" th:href="@{/products}">Back to products</a>
+    </div>
+    <div class="col-12 small text-muted">Each label has a barcode and a QR code with the same product ID. Print at 100% scale, and keep the codes flat and clean for scanning.</div>
+  </form></div></div>
+<div class="label-grid">
+  <div class="label-card" th:each="p : ${products}" th:attr="data-code=${p.barcode}">
+    <div class="d-flex justify-content-between align-items-start gap-2">
+      <div><div class="lc-cat" th:text="${p.category.name}">Category</div><div class="lc-name" th:text="${p.name}">Product</div></div>
+      <div class="lc-price" th:text="${'Rs ' + #numbers.formatDecimal(p.sellingPrice, 1, 2)}">Rs 0.00</div>
+    </div>
+    <div class="lc-codes"><div class="lc-barwrap"><svg class="lc-bar"></svg></div><div class="lc-qr"></div></div>
+    <div class="lc-num" th:text="${p.barcode}">0000000000000</div>
+  </div>
+</div>
+<div class="text-center text-muted py-4" th:if="${#lists.isEmpty(products)}">No products found</div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script th:src="@{/js/vendor/JsBarcode.all.min.js}"></script>
+<script th:src="@{/js/vendor/qrcode.js}"></script>
+<script th:src="@{/js/codes.js}"></script>
+<script th:src="@{/js/labels.js}"></script>
+</body></html>

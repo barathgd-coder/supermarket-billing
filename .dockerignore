@@ -1,0 +1,10 @@
+target/
+data/
+uploads/
+.git/
+.idea/
+*.iml
+.vscode/
+*.zip
+README.md
+DEPLOY.md

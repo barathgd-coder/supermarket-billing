@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Sales history')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('sales')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Sales history')}"></header>
+<main class="app-content">
+<div class="card mb-3"><div class="card-body">
+  <form method="get" th:action="@{/sales}" class="row g-2 align-items-end">
+    <div class="col-md-4"><label class="form-label small">Invoice number</label><input name="invoice" th:value="${invoice}" class="form-control" placeholder="INV-20260101-0001"></div>
+    <div class="col-md-3"><label class="form-label small">From</label><input type="date" name="from" th:value="${from}" class="form-control"></div>
+    <div class="col-md-3"><label class="form-label small">To</label><input type="date" name="to" th:value="${to}" class="form-control"></div>
+    <div class="col-md-2 d-flex gap-2"><button class="btn btn-primary flex-fill">Filter</button><a class="btn btn-light" th:href="@{/sales}">Reset</a></div>
+  </form></div></div>
+<div class="alert alert-primary d-flex justify-content-between"><span><strong th:text="${page.totalElements}">0</strong> bills</span>
+  <span>Total sales: <strong th:text="${store.currency + #numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">0</strong></span></div>
+<div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+  <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Cashier</th><th>Payment</th><th class="text-end">Total</th><th></th></tr></thead>
+  <tbody>
+  <tr th:each="s : ${page.content}">
+    <td th:text="${s.invoiceNumber}"></td>
+    <td th:text="${#temporals.format(s.saleDate, 'dd MMM yyyy HH:mm')}"></td>
+    <td th:text="${s.customerName ?: 'Walk-in'}"></td>
+    <td th:text="${s.cashier.fullName}"></td>
+    <td><span class="badge text-bg-secondary" th:text="${s.paymentMethod}"></span></td>
+    <td class="text-end" th:text="${store.currency + #numbers.formatDecimal(s.grandTotal, 1, 'COMMA', 2, 'POINT')}"></td>
+    <td class="text-end text-nowrap">
+      <a class="btn btn-sm btn-outline-primary" th:href="@{/sales/{id}/invoice(id=${s.id})}"><i class="bi bi-eye"></i> View</a>
+      <a class="btn btn-sm btn-outline-secondary" th:href="@{/sales/{id}/invoice.pdf(id=${s.id})}"><i class="bi bi-file-earmark-pdf"></i></a>
+    </td></tr>
+  <tr th:if="${page.empty}"><td colspan="7" class="text-center text-muted py-4">No bills found</td></tr>
+  </tbody></table></div>
+  <div class="card-footer" th:replace="~{fragments/layout :: pagination(${page})}"></div></div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body></html>

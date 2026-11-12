@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Invoice')}"></head>
+<body>
+<div class="container py-3">
+  <div class="no-print d-flex flex-wrap gap-2 justify-content-between align-items-center mx-auto" style="max-width:760px">
+    <div class="alert alert-success py-2 mb-0 flex-fill" th:if="${justCreated}"><i class="bi bi-check-circle"></i> Payment received - sale completed.</div>
+    <div class="ms-auto d-flex gap-2">
+      <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+      <a class="btn btn-outline-danger" th:href="@{/sales/{id}/invoice.pdf(id=${sale.id})}"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+      <a class="btn btn-success" th:href="@{/billing}"><i class="bi bi-plus-lg"></i> New bill</a>
+      <a class="btn btn-light" th:href="@{/sales}">History</a>
+    </div>
+  </div>
+  <div class="invoice">
+    <div class="text-center mb-3">
+      <img class="logo mb-2" th:src="@{/logo(v=${store.logoVersion})}" alt="logo">
+      <h2 class="h4 mb-0" th:text="${store.name}">Store</h2>
+      <div th:text="${store.address}">Address</div>
+      <div>Phone: <span th:text="${store.phone}"></span><span th:if="${!#strings.isEmpty(store.gstin)}"> &nbsp;|&nbsp; GSTIN: <span th:text="${store.gstin}"></span></span></div>
+    </div>
+    <hr>
+    <div class="row mb-3">
+      <div class="col-6"><div><strong>Invoice:</strong> <span th:text="${sale.invoiceNumber}"></span></div>
+        <div><strong>Date:</strong> <span th:text="${#temporals.format(sale.saleDate, 'dd MMM yyyy, hh:mm a')}"></span></div>
+        <div><strong>Cashier:</strong> <span th:text="${sale.cashier.fullName}"></span></div></div>
+      <div class="col-6 text-end"><div><strong>Customer:</strong> <span th:text="${sale.customerName ?: 'Walk-in customer'}"></span></div>
+        <div th:if="${sale.customerPhone != null}"><strong>Phone:</strong> <span th:text="${sale.customerPhone}"></span></div>
+        <div><strong>Payment:</strong> <span th:text="${sale.paymentMethod}"></span></div></div>
+    </div>
+    <table class="table table-sm">
+      <thead><tr><th>Item</th><th class="text-end">Qty</th><th class="text-end">Unit price</th><th class="text-end">Discount</th><th class="text-end">Tax</th><th class="text-end">Total</th></tr></thead>
+      <tbody><tr th:each="i : ${sale.items}">
+        <td th:text="${i.productName}"></td><td class="text-end" th:text="${i.quantity}"></td>
+        <td class="text-end" th:text="${#numbers.formatDecimal(i.unitPrice, 1, 'COMMA', 2, 'POINT')}"></td>
+        <td class="text-end" th:text="${#numbers.formatDecimal(i.discountAmount, 1, 'COMMA', 2, 'POINT')}"></td>
+        <td class="text-end"><span th:text="${#numbers.formatDecimal(i.taxAmount, 1, 'COMMA', 2, 'POINT')}"></span> <small>(<span th:text="${i.gstPercent.stripTrailingZeros().toPlainString()}"></span>%)</small></td>
+        <td class="text-end" th:text="${#numbers.formatDecimal(i.lineTotal, 1, 'COMMA', 2, 'POINT')}"></td></tr></tbody>
+    </table>
+    <div class="row justify-content-end"><div class="col-sm-6">
+      <table class="table table-sm table-borderless mb-0">
+        <tr><td>Subtotal</td><td class="text-end" th:text="${store.currency + #numbers.formatDecimal(sale.subtotal, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+        <tr><td>Discount</td><td class="text-end" th:text="${'-' + store.currency + #numbers.formatDecimal(sale.discountAmount, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+        <tr><td>GST</td><td class="text-end" th:text="${store.currency + #numbers.formatDecimal(sale.taxTotal, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+        <tr class="fw-bold fs-5 border-top"><td>Grand total</td><td class="text-end" th:text="${store.currency + #numbers.formatDecimal(sale.grandTotal, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+      </table></div></div>
+    <hr>
+    <p class="text-center mb-0" th:text="${store.footer}">Thank you!</p>
+  </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Inventory')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('inventory')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('Inventory')}"></header>
+<main class="app-content">
+<div class="row g-3 mb-3">
+  <div class="col-lg-4"><div class="card h-100"><div class="card-header"><i class="bi bi-arrow-left-right"></i> Stock-in / Stock-out</div><div class="card-body">
+    <form th:action="@{/inventory/entry}" th:object="${entry}" method="post" class="needs-validation" novalidate>
+      <div class="mb-2"><label class="form-label small mb-0">Product *</label>
+        <select class="form-select" th:field="*{productId}" required><option value="">Select product...</option>
+          <option th:each="p : ${products}" th:value="${p.id}" th:text="${p.name + ' (' + p.quantity + ')'}"></option></select></div>
+      <div class="mb-2 btn-group w-100"><input type="radio" class="btn-check" th:field="*{type}" value="STOCK_IN" id="tin"><label class="btn btn-outline-success" for="tin">Stock in</label>
+        <input type="radio" class="btn-check" th:field="*{type}" value="STOCK_OUT" id="tout"><label class="btn btn-outline-danger" for="tout">Stock out</label></div>
+      <div class="mb-2"><label class="form-label small mb-0">Quantity *</label><input type="number" min="1" step="1" class="form-control" th:field="*{quantity}" required></div>
+      <div class="mb-2"><label class="form-label small mb-0">Reference (invoice / PO)</label><input class="form-control" th:field="*{reference}" maxlength="100"></div>
+      <div class="mb-3"><label class="form-label small mb-0">Note</label><input class="form-control" th:field="*{note}" maxlength="255"></div>
+      <button class="btn btn-primary w-100">Save entry</button>
+    </form></div></div></div>
+  <div class="col-lg-4"><div class="card h-100 border-warning"><div class="card-header text-warning"><i class="bi bi-exclamation-triangle"></i> Low stock <span class="badge text-bg-warning" th:text="${#lists.size(lowStock)}">0</span></div>
+    <ul class="list-group list-group-flush overflow-auto" style="max-height:300px">
+      <li class="list-group-item d-flex justify-content-between" th:each="p : ${lowStock}"><span th:text="${p.name}"></span><span class="badge text-bg-warning" th:text="${p.quantity}"></span></li>
+      <li class="list-group-item text-muted" th:if="${#lists.isEmpty(lowStock)}">All products are well stocked</li></ul></div></div>
+  <div class="col-lg-4"><div class="card h-100 border-danger"><div class="card-header text-danger"><i class="bi bi-calendar-x"></i> Expired products <span class="badge text-bg-danger" th:text="${#lists.size(expired)}">0</span></div>
+    <ul class="list-group list-group-flush overflow-auto" style="max-height:300px">
+      <li class="list-group-item d-flex justify-content-between" th:each="p : ${expired}"><span th:text="${p.name + ' (qty ' + p.quantity + ')'}"></span><span class="badge text-bg-danger" th:text="${#temporals.format(p.expiryDate, 'dd MMM yyyy')}"></span></li>
+      <li class="list-group-item text-muted" th:if="${#lists.isEmpty(expired)}">No expired products</li></ul></div></div>
+</div>
+<div class="card mb-2"><div class="card-body py-2">
+  <form method="get" th:action="@{/inventory}" class="row g-2 align-items-center">
+    <div class="col-md-5"><div class="field-scan"><input id="qInput" name="q" th:value="${q}" class="form-control" placeholder="Search current stock by name or barcode"><button type="button" class="btn btn-outline-primary" data-scan-target="#qInput" title="Scan with camera"><i class="bi bi-camera"></i></button></div></div>
+    <div class="col-md-3"><select name="stock" class="form-select"><option value="">All stock levels</option><option value="IN" th:selected="${stock == 'IN'}">In stock</option><option value="LOW" th:selected="${stock == 'LOW'}">Low</option><option value="OUT" th:selected="${stock == 'OUT'}">Out of stock</option><option value="EXPIRED" th:selected="${stock == 'EXPIRED'}">Expired</option></select></div>
+    <div class="col-md-4 d-flex gap-2"><button class="btn btn-primary">Filter</button><a class="btn btn-light" th:href="@{/inventory/history}">Full inventory history</a></div>
+  </form></div></div>
+<div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+  <thead><tr><th>Barcode</th><th>Product</th><th>Category</th><th class="text-end">In stock</th><th class="text-end">Reorder at</th><th>Expiry</th></tr></thead>
+  <tbody><tr th:each="p : ${page.content}">
+    <td th:text="${p.barcode}"></td><td th:text="${p.name}"></td><td th:text="${p.category.name}"></td>
+    <td class="text-end"><span class="badge" th:classappend="${p.outOfStock} ? 'text-bg-danger' : (${p.lowStock} ? 'text-bg-warning' : 'text-bg-success')" th:text="${p.quantity}"></span></td>
+    <td class="text-end" th:text="${p.reorderLevel}"></td>
+    <td><span th:if="${p.expiryDate != null}" class="badge" th:classappend="${p.expired} ? 'text-bg-danger' : (${p.nearExpiry} ? 'text-bg-warning' : 'text-bg-light border')" th:text="${#temporals.format(p.expiryDate, 'dd MMM yyyy')}"></span></td></tr>
+  <tr th:if="${page.empty}"><td colspan="6" class="text-center text-muted py-4">Nothing found</td></tr></tbody></table></div>
+  <div class="card-footer" th:replace="~{fragments/layout :: pagination(${page})}"></div></div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body></html>

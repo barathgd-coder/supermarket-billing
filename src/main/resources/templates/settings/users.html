@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('User management')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar('users')}"></aside>
+<div class="app-main">
+<header th:replace="~{fragments/layout :: topbar('User management')}"></header>
+<main class="app-content">
+<div class="row g-3">
+  <div class="col-lg-8"><div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+    <thead><tr><th>Username</th><th>Full name</th><th>Role</th><th>Status</th><th></th></tr></thead>
+    <tbody><tr th:each="u : ${users}"><td th:text="${u.username}"></td><td th:text="${u.fullName}"></td>
+      <td><span class="badge" th:classappend="${u.admin} ? 'text-bg-primary' : 'text-bg-success'" th:text="${u.role.name == 'ROLE_ADMIN'} ? 'Admin' : 'Cashier'"></span></td>
+      <td><span class="badge" th:classappend="${u.enabled} ? 'text-bg-success' : 'text-bg-secondary'" th:text="${u.enabled} ? 'Active' : 'Disabled'"></span></td>
+      <td class="text-end"><a class="btn btn-sm btn-outline-secondary" th:href="@{/settings/users(edit=${u.id})}"><i class="bi bi-pencil"></i></a></td></tr></tbody></table></div></div></div>
+  <div class="col-lg-4"><div class="card"><div class="card-header" th:text="${form.id == null} ? 'Add user' : 'Edit user'">User</div><div class="card-body">
+    <form th:action="@{/settings/users/save}" th:object="${form}" method="post" class="needs-validation" novalidate>
+      <div class="alert alert-danger py-2" th:if="${#fields.hasGlobalErrors()}"><div th:each="e : ${#fields.globalErrors()}" th:text="${e}"></div></div>
+      <input type="hidden" th:field="*{id}">
+      <div class="mb-2"><label class="form-label small mb-0">Username *</label><input class="form-control" th:field="*{username}" th:readonly="${form.id != null}" th:errorclass="is-invalid" required><div class="invalid-feedback" th:errors="*{username}">Required</div></div>
+      <div class="mb-2"><label class="form-label small mb-0">Full name *</label><input class="form-control" th:field="*{fullName}" th:errorclass="is-invalid" required><div class="invalid-feedback" th:errors="*{fullName}">Required</div></div>
+      <div class="mb-2"><label class="form-label small mb-0" th:text="${form.id == null} ? 'Password * (min 6)' : 'New password (leave blank to keep)'">Password</label><input type="password" class="form-control" th:field="*{password}" minlength="6" th:required="${form.id == null}" autocomplete="new-password"></div>
+      <div class="mb-2"><label class="form-label small mb-0">Role *</label><select class="form-select" th:field="*{roleName}" required>
+        <option th:each="r : ${roles}" th:value="${r}" th:text="${r == 'ROLE_ADMIN'} ? 'Admin' : 'Cashier'"></option></select></div>
+      <div class="form-check mb-3"><input type="checkbox" class="form-check-input" th:field="*{enabled}" id="en"><label class="form-check-label" for="en">Account enabled</label></div>
+      <button class="btn btn-primary">Save user</button> <a class="btn btn-light" th:href="@{/settings/users}" th:if="${form.id != null}">Cancel</a>
+    </form></div></div></div>
+</div>
+</main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body></html>
